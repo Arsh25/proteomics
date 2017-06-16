@@ -1,3 +1,4 @@
 *.csv
 real.mzXML
 __pycache__
+results/
