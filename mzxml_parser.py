@@ -16,7 +16,6 @@ def find_scan(file_name,scan_num):
 			if line.find("<scan") != -1:
 				current_scan = line[line.find("=")+2:-2]
 				if current_scan == str(scan_num):
-					print("FOUND scan: "+current_scan)
 					while(True):
 						next_line = scan_file.readline()
 						previous_line = next_line
@@ -47,6 +46,13 @@ def parse_peaks(peaks_decoded):
 		idx += 1
 	return mz_list,intensity_list
 
+def get_peaks(mzxml_file,scan):
+	scan_data = find_scan(mzxml_file,scan)
+	encoded_peaks = scan_data[scan_data.find(">")+1:]
+	peaks = base64.b64decode(encoded_peaks)
+	mz_list,intensity_list = parse_peaks(peaks)
+	return mz_list,intensity_list
+
 def write_to_csv(filename,data):
 	with open(filename+'.csv','w',newline='') as csv_file:
 		data_writer = csv.writer(csv_file,dialect='excel')
@@ -54,13 +60,8 @@ def write_to_csv(filename,data):
 
 
 if __name__ == '__main__':
-	data = find_scan("real.mzXML",5000)	
-	peaks = data[data.find(">")+1:]
-	data = data.replace('>'," ")
-	data = data.replace(" ","")
-	decoded = base64.b64decode(peaks)
-	
-	mz_list,intensity_list = parse_peaks(decoded) 
+	#data = find_scan("real.mzXML",5000)	
+	mz_list,intensity_list = get_peaks('real.mzXML',5000)
 
 	print('{0:15} | {1:2}'.format("        mz","mz intensity"))
 	for mz,intensity in zip(mz_list,intensity_list):
