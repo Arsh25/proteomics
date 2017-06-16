@@ -31,7 +31,9 @@ def write_csv_files(scan_results):
 		with open('results/'+str(scan['scan'])+'.csv','w') as csv_file:
 			csv_writer = csv.DictWriter(csv_file,fieldnames=field_names,dialect='excel')
 			csv_writer.writeheader()
-			csv_writer.writerow({'peptide':scan['peptide'],'peaks':scan['peaks']})
+			csv_writer.writerow({'peptide':scan['peptide']})
+			for peak in zip(scan['peaks']):# Write each peak in new row
+				csv_writer.writerow({'peaks':peak[0]})
 
 
 if __name__ == '__main__':
