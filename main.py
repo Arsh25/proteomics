@@ -3,13 +3,15 @@
 # Arsh Chauhan
 # main.py: Main program to integrate mzxml_parser and handle_csv. Made for a particular workflow
 # 06/16/2017
-# Last Edited: 06/16/2017
+# Last Edited: 06/17/2017
 # MIT License (2017)
 
 import mzxml_parser
 import handle_csv
 import csv
 import pathlib
+import argparse
+import os
 
 def colate_scan_info(mzxml_file,scans_file):
 	scan_nums = handle_csv.read_scans_list(scans_file)
@@ -24,11 +26,12 @@ def colate_scan_info(mzxml_file,scans_file):
 		results.append(current_scan)
 	return results
 
-def write_csv_files(scan_results):
-	pathlib.Path('results').mkdir(parents=True,exist_ok=True)
+def write_csv_files(experiment,scan_results):
+	pathlib.Path('results/'+experiment).mkdir(parents=True,exist_ok=True)
 	field_names=['peptide','peaks']
+	os.chdir('results/'+experiment)
 	for scan in scan_results:
-		with open('results/'+str(scan['scan'])+'.csv','w') as csv_file:
+		with open(str(scan['scan'])+'.csv','w') as csv_file:
 			csv_writer = csv.DictWriter(csv_file,fieldnames=field_names,dialect='excel')
 			csv_writer.writeheader()
 			csv_writer.writerow({'peptide':scan['peptide']})
@@ -37,5 +40,17 @@ def write_csv_files(scan_results):
 
 
 if __name__ == '__main__':
-	collated_data = colate_scan_info('real.mzXML','scan_list.csv')
-	write_csv_files(collated_data)
+
+	parser = argparse.ArgumentParser(description='Colate peptide and mz informarion from various files.')
+	parser.add_argument('--infile',type=str,help='Raw file converted \
+						to mzXML with 32 bit precision and no zlib compression',
+						default='sample.mzXML')
+	parser.add_argument('--scans',type=str,help='csv file with scan numbers to match'
+	 					,default='scan_list.csv')
+	parser.add_argument('--name',type=str,help='Experiment name. Results will be \
+						stored in results/name. Default is --infile')
+	args = parser.parse_args()
+	collated_data = colate_scan_info(args.infile,args.scans)
+	if args.name is None: #Check to see if --name was passed
+		args.name = args.infile
+	write_csv_files(args.name,collated_data)
