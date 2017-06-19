@@ -12,22 +12,29 @@ import csv
 
 def find_scan(file_name,scan_num):
 	with open (file_name,'r') as scan_file:
+		peaks = ""
+		precursor_charge = ""
 		for line in scan_file:
+			found = False
 			if line.find("<scan") != -1:
 				current_scan = line[line.find("=")+2:-2]
 				if current_scan == str(scan_num):
 					while(True):
 						next_line = scan_file.readline()
 						previous_line = next_line
-						if next_line.find('<peaks') !=-1:
+						if next_line.find('<precursorMz') !=-1:
+							end_tag = next_line.find('>')
+							precursor_charge = next_line[end_tag+1:next_line.find('</precursorMz>')]
+						elif next_line.find('<peaks') !=-1:
 							output = ""
 							while(True):
 								next_line = scan_file.readline()
 								output += next_line
 								if next_line.find(">") != -1:
-									output = output[:output.find("<")]
-									return output
+									peaks = output[:output.find("<")]
+									return peaks,precursor_charge
 
+									
 def parse_peaks(peaks_decoded):
 	#Based on code by Taejoon Kwon (https://code.google.com/archive/p/massspec-toolbox/)
 	tmp_size = len(peaks_decoded)/4
@@ -47,7 +54,7 @@ def parse_peaks(peaks_decoded):
 	return mz_list,intensity_list
 
 def get_peaks(mzxml_file,scan):
-	scan_data = find_scan(mzxml_file,scan)
+	scan_data,precursor_charge = find_scan(mzxml_file,scan)
 	encoded_peaks = scan_data[scan_data.find(">")+1:]
 	peaks = base64.b64decode(encoded_peaks)
 	mz_list,intensity_list = parse_peaks(peaks)
@@ -61,7 +68,7 @@ def write_to_csv(filename,data):
 
 if __name__ == '__main__':
 	#data = find_scan("real.mzXML",5000)	
-	mz_list,intensity_list = get_peaks('real.mzXML',5000)
+	mz_list,intensity_list = get_peaks('sample.mzXML',5000)
 
 	print('{0:15} | {1:2}'.format("        mz","mz intensity"))
 	for mz,intensity in zip(mz_list,intensity_list):
