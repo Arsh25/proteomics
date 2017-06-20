@@ -15,7 +15,6 @@ def find_scan(file_name,scan_num):
 		peaks = ""
 		precursor_charge = ""
 		for line in scan_file:
-			found = False
 			if line.find("<scan") != -1:
 				current_scan = line[line.find("=")+2:-2]
 				if current_scan == str(scan_num):
@@ -58,7 +57,7 @@ def get_peaks(mzxml_file,scan):
 	encoded_peaks = scan_data[scan_data.find(">")+1:]
 	peaks = base64.b64decode(encoded_peaks)
 	mz_list,intensity_list = parse_peaks(peaks)
-	return mz_list,intensity_list
+	return mz_list,intensity_list,precursor_charge
 
 def write_to_csv(filename,data):
 	with open(filename+'.csv','w',newline='') as csv_file:
@@ -68,8 +67,9 @@ def write_to_csv(filename,data):
 
 if __name__ == '__main__':
 	#data = find_scan("real.mzXML",5000)	
-	mz_list,intensity_list = get_peaks('sample.mzXML',5000)
+	mz_list,intensity_list,precursor_charge = get_peaks('real.mzXML',14)
 
+	print (precursor_charge)
 	print('{0:15} | {1:2}'.format("        mz","mz intensity"))
 	for mz,intensity in zip(mz_list,intensity_list):
 		print('{0:15f} | {1:2f}'.format(mz,intensity))
