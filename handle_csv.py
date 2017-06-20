@@ -19,7 +19,7 @@ def get_peptide(file_name,scan_list):
 		peptides = []
 		for row in csv_reader:
 		 	if int(row['start_scan']) in scan_list:
-		 		peptides.append({'scan':row['start_scan'],'peptide':row['peptide']}) 
+		 		peptides.append({'scan':row['start_scan'],'peptide':row['peptide'],'precursor_mz':row['precursor_mz'],'mods':row['mods']}) 
 		 	if len(peptides) == len(scan_list): # Found all, return
 		 		return peptides
 		return peptides
