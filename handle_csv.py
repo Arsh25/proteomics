@@ -7,6 +7,8 @@
 # MIT License (2017)
 
 import csv
+import pathlib
+import os
 
 # get_peptide
 # filename: csv file with scan information
@@ -37,8 +39,50 @@ def read_scans_list(scan_list):
 		scan_nums = [int(i) for i in scan_nums[0]] #Convert to a list of int
 		return scan_nums
 
+def match_peptide_lists(all_info,to_do):
+	with open(all_info,'r') as mothership_file, open(to_do,'r') as remaining:
+		dialect_mothership = csv.Sniffer().sniff(mothership_file.read(1024))
+		#dialect_remaining = csv.Sniffer().sniff(remaining.read(1024))
+		mothership_fieldnames = ['spectra_set','start_scan','precursor_neutral_mass','calc_neutral_pep_mass','peptide','mods','protein','estfdr']
+		mothership_reader = csv.DictReader(mothership_file,fieldnames=mothership_fieldnames)
+		remaining_reader = csv.reader(remaining) 
+		peptide_list = []
+		remaining_psm = [] #psm: peptide spectram match
+		for peptide in remaining_reader:
+			peptide_list.append(peptide[0])
+		for result in mothership_reader:
+		# 	print(result)
+		 	if result['peptide'] in peptide_list:
+		  		remaining_psm.append(result)
+		return remaining_psm
+def write_to_csv(filename,data_list):
+	pathlib.Path('results/').mkdir(parents=True,exist_ok=True)
+	os.chdir('results/')
+	extension = ""
+	if filename.find(".") != -1:
+		extension = filename[filename.find('.')+1:]
+		if extension != 'csv':
+			filename = filename+'.'+'csv'
+	else:
+		filename = filename+'.'+'csv'
+	fieldnames = ['spectra_set','start_scan','precursor_neutral_mass','calc_neutral_pep_mass',\
+					'peptide','mods','protein','estfdr']
+	with open(filename,'w') as csv_file:
+		writer = csv.DictWriter(csv_file,fieldnames=fieldnames)
+		writer.writeheader()
+		for row in data_list:
+			writer.writerow({'spectra_set':row['spectra_set'],'start_scan':row['start_scan'],\
+							'precursor_neutral_mass':row['precursor_neutral_mass'],\
+							'calc_neutral_pep_mass':row['calc_neutral_pep_mass'],\
+							'peptide':row['peptide'],'mods':row['mods'],'protein':row['protein'],\
+							'estfdr':row['estfdr']})
+
 if __name__ == '__main__':
-	scan_nums = read_scans_list('scan_list.csv')
-	scan_nums.sort()
-	peptides = get_peptide('real.csv',scan_nums)
-	print(peptides)
+	# scan_nums = read_scans_list('scan_list.csv')
+	# scan_nums.sort()
+	# peptides = get_peptide('real.csv',scan_nums)
+	# print(peptides)
+	remaining_psm = match_peptide_lists("Mothership.csv","correct peptide list.csv")
+	#print(remaining_psm)
+	print("WRITING CSV FILE")
+	write_to_csv("remaining_psm",remaining_psm)
