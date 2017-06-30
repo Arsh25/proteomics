@@ -12,6 +12,8 @@ import csv
 
 def find_scan(file_name,scan_num):
 	with open (file_name,'r') as scan_file:
+		if scan_file is None:
+			print (file_name)
 		peaks = ""
 		precursor_charge = ""
 		for line in scan_file:

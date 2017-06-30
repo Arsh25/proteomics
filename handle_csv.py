@@ -3,7 +3,7 @@
 # Arsh Chauhan
 # handle_csv.py: Handle data from csv exported from <insert program here>
 # 06/16/2017
-# Last Edited: 06/16/2017
+# Last Edited: 06/29/2017
 # MIT License (2017)
 
 import csv
@@ -32,9 +32,9 @@ def get_peptide(file_name,scan_list):
 # 		scan_nums: list of all scan numbers in scan_list
 def read_scans_list(scan_list):
 	with open(scan_list,'r') as scan_list:
-		dialect = csv.Sniffer().sniff(scan_list.read(1024))
-		scan_list.seek(0)
-		csv_reader = csv.reader(scan_list,dialect)
+		#dialect = csv.Sniffer().sniff(scan_list.read(1024))
+		#scan_list.seek(0)
+		csv_reader = csv.reader(scan_list)
 		scan_nums = list(csv_reader)
 		scan_nums = [int(i) for i in scan_nums[0]] #Convert to a list of int
 		return scan_nums
