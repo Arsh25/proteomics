@@ -76,13 +76,27 @@ def write_to_csv(filename,data_list):
 							'calc_neutral_pep_mass':row['calc_neutral_pep_mass'],\
 							'peptide':row['peptide'],'mods':row['mods'],'protein':row['protein'],\
 							'estfdr':row['estfdr']})
+# colate all files in folder into different files by spectra set
+def colate_by_spectra_file(folder):
+	base_path = os.path.dirname(os.path.realpath(__file__))
+	pathlib.Path(base_path+"/results/spectra_collated").mkdir(parents=True,exist_ok=True)
+	fieldnames = ['spectra_set','start_scan','precursor_neutral_mass','calc_neutral_pep_mass',\
+					'peptide','mods','protein','estfdr']
+	for file in os.listdir(folder):
+		with open(folder+'/'+file,'r') as peptide_file:
+			reader = csv.DictReader(peptide_file,fieldnames=fieldnames)
+			for row in reader:
+				with open(base_path+"/results/spectra_collated/"+row['spectra_set']+".csv",'a') as collated_file:
+					writer = csv.DictWriter(collated_file,fieldnames=fieldnames)
+					writer.writerow(row)
 
 if __name__ == '__main__':
 	# scan_nums = read_scans_list('scan_list.csv')
 	# scan_nums.sort()
 	# peptides = get_peptide('real.csv',scan_nums)
 	# print(peptides)
-	remaining_psm = match_peptide_lists("Mothership.csv","correct peptide list.csv")
-	#print(remaining_psm)
-	print("WRITING CSV FILE")
-	write_to_csv("remaining_psm",remaining_psm)
+	# remaining_psm = match_peptide_lists("Mothership.csv","correct peptide list.csv")
+	# #print(remaining_psm)
+	# print("WRITING CSV FILE")
+	# write_to_csv("remaining_psm",remaining_psm)
+	colate_by_spectra_file("results/peptides")
