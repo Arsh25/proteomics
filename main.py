@@ -66,16 +66,6 @@ def get_batch_peaks(mzxml_file,minfdr_file,experiment):
 		os.chdir(base_path)
 		loop_iter += 1
 		
-		# os.chdir('results/'+experiment)
-		# with open(str(current_scan['scan'])+'.csv','w') as csv_file:
-		# 	writer = csv.writer(csv_file,dialect='excel')
-		# 	writer.writerow(current_scan['peaks'])
-		# os.chdir'(../../')
-	# for scan in results:
-	# 	with open(str(scan['scan'])+'.csv','w') as csv_file:
-	# 		writer = csv.writer(csv_file,dialect='excel')
-	# 		writer.writerow(scan['peaks'])
-
 def write_csv_files(experiment,scan_results,peaks=True):
 	pathlib.Path('results/'+experiment).mkdir(parents=True,exist_ok=True)
 	field_names=['spectra_set','scan','precursor_neutral_mass','calc_neutral_pep_mass','peptide','mods','protein','estfdr','peaks']
