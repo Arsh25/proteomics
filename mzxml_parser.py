@@ -37,6 +37,7 @@ def find_scan(file_name,scan_num):
 										return peaks,precursor_charge
 						except:
 							print ("Could not handle scan: "+current_scan)
+							break
 
 def find_scan_RAM(file_name,scan_nums_list):
 	with open (file_name,'r') as scan_file:
