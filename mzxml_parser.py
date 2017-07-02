@@ -90,9 +90,14 @@ def parse_peaks(peaks_decoded):
 
 def get_peaks(mzxml_file,scan,RAM=False):
 	scan_data,precursor_charge = find_scan(mzxml_file,scan)
-	encoded_peaks = scan_data[scan_data.find(">")+1:]
-	peaks = base64.b64decode(encoded_peaks)
-	mz_list,intensity_list = parse_peaks(peaks)
+	try:
+		encoded_peaks = scan_data[scan_data.find(">")+1:]
+		peaks = base64.b64decode(encoded_peaks)
+		mz_list,intensity_list = parse_peaks(peaks)
+	except:
+		print("Could not handle scan:" +scan)
+		return [],[],""
+	
 	return mz_list,intensity_list,precursor_charge
 
 def get_peaks_RAM(mzxml_file,scan_list):
