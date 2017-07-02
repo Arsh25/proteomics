@@ -39,36 +39,34 @@ def find_scan(file_name,scan_num):
 							print ("Could not handle scan: "+current_scan)
 							break
 
-def find_scan_RAM(file_name,scan_nums_list):
+def find_scan_RAM(file_name,current_scan):
 	with open (file_name,'r') as scan_file:
 		if scan_file is None:
 			print (file_name)
-		peaks = []
-		precursor_charge = []
+		peaks = ""
+		precursor_charge = ""
 		memory_file = []
 		for line in scan_file:
 			memory_file.append(line)
-		for scan in scan_nums_list:
-			for line in memory_file:
-				if line.find("<scan") != -1:
-					current_scan = line[line.find("=")+2:-2]
-					if str(scan) == current_scan:
-						while(True):
-							next_line = scan_file.readline()
-							previous_line = next_line
-							if next_line.find('<precursorMz') !=-1:
-								end_tag = next_line.find('>')
-								current_precursor_charge = next_line[end_tag+1:next_line.find('</precursorMz>')]
-							elif next_line.find('<peaks') !=-1:
-								output = ""
-								while(True):
-									next_line = scan_file.readline()
-									output += next_line
-									if next_line.find(">") != -1:
-										current_peak = output[:output.find("<")]
-										peaks.append(current_peak)
-										precursor_charge.append(current_precursor_charge)
-		return peaks,precursor_charge
+		for i in range(0,len(memory_file)):
+			line = memory_file[i]
+			if line.find("<scan") != -1:
+				current_scan = line[line.find("=")+2:-2]
+				if str(scan) == current_scan:
+					while(True):
+						next_line = memory_file[i+1]
+						previous_line = next_line
+						if next_line.find('<precursorMz') !=-1:
+							end_tag = next_line.find('>')
+							precursor_charge = next_line[end_tag+1:next_line.find('</precursorMz>')]
+						elif next_line.find('<peaks') !=-1:
+							output = ""
+							while(True):
+								next_line = memory_file[i+2]
+								output += next_line
+								if next_line.find(">") != -1:
+									peaks = output[:output.find("<")]
+	return peaks,precursor_charge
 									
 def parse_peaks(peaks_decoded):
 	#Based on code by Taejoon Kwon (https://code.google.com/archive/p/massspec-toolbox/)
@@ -89,7 +87,10 @@ def parse_peaks(peaks_decoded):
 	return mz_list,intensity_list
 
 def get_peaks(mzxml_file,scan,RAM=False):
-	scan_data,precursor_charge = find_scan(mzxml_file,scan)
+	if RAM:
+		scan_data,precursor_charge = find_scan_RAM(mzxml_file,scan)
+	else:
+		scan_data,precursor_charge = find_scan(mzxml_file,scan)
 	try:
 		encoded_peaks = scan_data[scan_data.find(">")+1:]
 		peaks = base64.b64decode(encoded_peaks)
@@ -98,16 +99,6 @@ def get_peaks(mzxml_file,scan,RAM=False):
 		print("Could not handle scan:" +scan)
 		return [],[],""
 	
-	return mz_list,intensity_list,precursor_charge
-
-def get_peaks_RAM(mzxml_file,scan_list):
-	scan_data,precursor_charge = find_scan_RAM(mzxml_file,scan_list)
-	all_mz = []
-	for scan in scan_data:
-		encoded_peaks = scan_data[scan_data.find(">")+1:]
-		peaks = base64.b64decode(encoded_peaks)
-		mz_list,intensity_list = parse_peaks(peaks)
-		all_mz.append()
 	return mz_list,intensity_list,precursor_charge
 
 def write_to_csv(filename,data):
