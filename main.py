@@ -27,7 +27,7 @@ def colate_scan_info(mzxml_file,scans_file):
 		current_scan['mods'] = peptides[0]['mods']
 		results.append(current_scan)
 	return results
-def get_batch_peaks(mzxml_file,minfdr_file,experiment):
+def get_batch_peaks(mzxml_file,minfdr_file,experiment,RAM=False):
 	#scan_nums = handle_csv.read_scans_list(scans_file)
 	fieldnames = ['spectra_set','start_scan','precursor_neutral_mass','calc_neutral_pep_mass','peptide','mods','protein','estfdr']
 	spectra_set = experiment
@@ -49,7 +49,7 @@ def get_batch_peaks(mzxml_file,minfdr_file,experiment):
 		if scan is None:
 			print ("NONE")
 			print(peptide)
-		mz,mz_intensity,precursor_charge = mzxml_parser.get_peaks(mzxml_file,scan)
+		mz,mz_intensity,precursor_charge = mzxml_parser.get_peaks(mzxml_file,scan,RAM)
 		current_scan['scan'] = peptide['start_scan']
 		current_scan['precursor_neutral_mass']=peptide['precursor_neutral_mass']
 		current_scan['peptide']=peptide['peptide']
@@ -100,5 +100,5 @@ if __name__ == '__main__':
 	#collated_data = colate_scan_info(args.infile,args.scans)
 	if args.name is None: #Check to see if --name was passed
 		args.name = args.infile
-	get_batch_peaks(args.infile,args.minfdr,args.name)
+	get_batch_peaks(args.infile,args.minfdr,args.name,True)
 	#write_csv_files(args.name,collated_data)
