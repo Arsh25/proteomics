@@ -8,6 +8,13 @@
 import sqlite3
 import os
 
+def log_error(error,database):
+	base_dir = os.getcwd()
+	os.chdir(os.getcwd()+'/logs')
+	with open(database+'errors.log','a') as log:
+		log.write(error+'\n')
+	os.chdir(base_dir)
+
 def create_database(database):
 	database = database[:database.find('.mzXML')]
 
@@ -49,8 +56,10 @@ def get_peaks(database,scan):
 	try:
 		current_peak = cursor.execute("SELECT peaks from scans WHERE number = (?)",(scan,))
 		encoded_peak = current_peak.fetchone()[0]
-	except:
-		print( "Something went wrong for scan "+str(scan))
+	except sqlite3.Error as e:
+		log_error(str(scan) +": " + str(e),database)
+	except TypeError as e:
+		log_error(str(scan) +": " + str(e),database)
 	return encoded_peak
 
 
