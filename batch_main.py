@@ -7,7 +7,7 @@
 # MIT License (2017)
 import subprocess
 import os
-from time import process_time
+import time
 
 def run_main(directory,excluded_files):
 	base_path = os.path.dirname(os.path.realpath(__file__))
@@ -100,6 +100,6 @@ if __name__ == '__main__':
 		#zip_results("results")
 		#create_do_not_check_list("results")
 		mzxml_to_db("/media/arsh/ResearchRazzle/converted",['160108_C812-1_a.mzXML'])
-		print("Overall Time: "+process_time()/60 + "minutes")
+		print("Overall Time: "+str(time.process_time()/60) + "minutes")
 	else:
 		print("Exiting")

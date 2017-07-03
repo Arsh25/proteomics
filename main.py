@@ -12,6 +12,7 @@ import csv
 import pathlib
 import argparse
 import os
+import time
 
 def colate_scan_info(mzxml_file,scans_file):
 	scan_nums = handle_csv.read_scans_list(scans_file)
@@ -49,7 +50,7 @@ def get_batch_peaks(mzxml_file,minfdr_file,experiment,RAM=False):
 		if scan is None:
 			print ("NONE")
 			print(peptide)
-		mz,mz_intensity,precursor_charge = mzxml_parser.get_peaks(mzxml_file,scan,RAM)
+		mz,mz_intensity = mzxml_parser.get_peaks(mzxml_file,scan)
 		current_scan['scan'] = peptide['start_scan']
 		current_scan['precursor_neutral_mass']=peptide['precursor_neutral_mass']
 		current_scan['peptide']=peptide['peptide']
@@ -85,7 +86,7 @@ def write_csv_files(experiment,scan_results,peaks=True):
 					csv_writer.writerow({'peaks':peak[0]})
 
 def mzxml_to_db(mzxml_file,experiment):
-	mzxml_parser.file_to_object(mzxml_file,experiment)
+	mzxml_parser.file_to_object(mzxml_file,experiment,True)
 
 if __name__ == '__main__':
 
@@ -102,7 +103,7 @@ if __name__ == '__main__':
 	#collated_data = colate_scan_info(args.infile,args.scans)
 	if args.name is None: #Check to see if --name was passed
 		args.name = args.infile
-	#get_batch_peaks(args.infile,args.minfdr,args.name,True)
+	get_batch_peaks(args.infile,args.minfdr,args.name)
 	#write_csv_files(args.name,collated_data)
-	mzxml_to_db(args.infile,args.name)
-	print ("time for "+ args.infile +":" + time.process_time()/60 + "minutes")
+	#mzxml_to_db(args.infile,args.name)
+	print ("time for "+ args.infile +":" + str(time.process_time()/60) + " minutes")

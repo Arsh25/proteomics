@@ -132,20 +132,14 @@ def parse_peaks(peaks_decoded):
 		idx += 1
 	return mz_list,intensity_list
 
-def get_peaks(mzxml_file,scan,RAM=False):
-	if RAM:
-		scan_data,precursor_charge = find_scan_RAM(mzxml_file,scan)
-	else:
-		scan_data,precursor_charge = find_scan(mzxml_file,scan)
-	try:
-		encoded_peaks = scan_data[scan_data.find(">")+1:]
-		peaks = base64.b64decode(encoded_peaks)
-		mz_list,intensity_list = parse_peaks(peaks)
-	except:
-		print("Could not handle scan:" +scan)
-		return [],[],""
+def get_peaks(db_file,scan,RAM=False):
+	os.chdir(os.getcwd())
+	encoded_peaks = database.get_peaks(db_file,scan)
+
+	peaks = base64.b64decode(encoded_peaks)
+	mz_list,intensity_list= parse_peaks(peaks)
 	
-	return mz_list,intensity_list,precursor_charge
+	return mz_list,intensity_list
 
 def write_to_csv(filename,data):
 	with open(filename+'.csv','w',newline='') as csv_file:
@@ -165,4 +159,4 @@ if __name__ == '__main__':
 
 	# print("GENERATING csv file. Open output.csv after termination")
 	# write_to_csv("output",mz_list)
-	file_to_object('160108_C812-1_a.mzXML','test',False,False)
+	file_to_object('/media/arsh/ResearchRazzle/converted/160108_C812-1_a.mzXML','test',False,False)

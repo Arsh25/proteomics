@@ -6,6 +6,7 @@
 # Last Edited: 07/02/2017
 
 import sqlite3
+import os
 
 def create_database(database):
 	database = database[:database.find('.mzXML')]
@@ -32,7 +33,24 @@ def add_scan(database,scan,RAM=False):
 		else:
 			cursor.execute("INSERT INTO scans(number,peaks) VALUES (?,?)",(scan['num'],scan['peaks']))
 	except sqlite3.IntegrityError as e:
-		db_conn.rollback()
+		pass
 	db_conn.commit()
+
+def connect_to_db(database):
+	database = database[:database.find('.mzXML')]
+	print(database)
+	db_conn = sqlite3.connect(database+'.sqlite')
+	return db_conn
+
+def get_peaks(database,scan):
+	db_conn = connect_to_db(database)
+	cursor = db_conn.cursor()
+	encoded_peak=""
+	try:
+		current_peak = cursor.execute("SELECT peaks from scans WHERE number = (?)",(scan,))
+		encoded_peak = current_peak.fetchone()[0]
+	except:
+		print( "Something went wrong for scan "+str(scan))
+	return encoded_peak
 
 
