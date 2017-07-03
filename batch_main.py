@@ -16,9 +16,9 @@ def run_main(directory,excluded_files):
 			print("running "+filename)
 			process = subprocess.run(["./main.py","--infile",directory+"/"+filename,\
 				"--minfdr",filename[:filename.find(".")]+".csv","--name",filename])
-			if process.returncode != 0:
-				with open('auto_run.log','a') as log:
-					log.write('running for '+ filename + ' existed with ' + str(process.returncode) + '\n')
+			# if process.returncode != 0:
+			# 	with open('auto_run.log','a') as log:
+			# 		log.write('running for '+ filename + ' existed with ' + str(process.returncode) + '\n')
 
 def run_main_parallel(directory,excluded_files):
 	base_path = os.path.dirname(os.path.realpath(__file__))
@@ -100,6 +100,6 @@ if __name__ == '__main__':
 		#zip_results("results")
 		#create_do_not_check_list("results")
 		mzxml_to_db("/media/arsh/ResearchRazzle/converted",['160108_C812-1_a.mzXML'])
-		print("Overall Time: "+str(time.process_time()/60) + "minutes")
+		print("Overall Time: "+str(time.process_time()/60) + " minutes")
 	else:
 		print("Exiting")
