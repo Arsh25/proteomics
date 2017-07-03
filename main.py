@@ -38,7 +38,10 @@ def get_batch_peaks(mzxml_file,minfdr_file,experiment,RAM=False):
 		reader = csv.DictReader(min_fdr,fieldnames=fieldnames)
 		min_fdr_list = list(reader)
 	os.chdir(base_path)
-	pathlib.Path(base_path+'/results/'+spectra_set).mkdir(parents=True,exist_ok=True)
+	try:
+		pathlib.Path(base_path+'/results/'+spectra_set).mkdir(parents=True)
+	except:
+		print("results folder probably exists")
 	loop_iter=0
 	total_scans = len(min_fdr_list)
 	for peptide in min_fdr_list:
@@ -106,4 +109,4 @@ if __name__ == '__main__':
 	get_batch_peaks(args.infile,args.minfdr,args.name)
 	#write_csv_files(args.name,collated_data)
 	#mzxml_to_db(args.infile,args.name)
-	print ("time for "+ args.infile +":" + str(time.process_time()/60) + " minutes")
+	#print ("time for "+ args.infile +":" + str(time.process_time()/60) + " minutes")
