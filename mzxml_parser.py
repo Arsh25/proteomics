@@ -9,6 +9,52 @@
 import base64
 import struct
 import csv
+import database
+import os
+
+def file_to_object(mzxml_file,database_name,RAM=False,debug=False):
+	scans_obj = []
+	database.create_database(database_name)
+	with open (mzxml_file,'r') as scan_file:
+		seen_peak_open = False
+		seen_peak_close = False
+		peaks = ""
+		current_scan = {}
+		for line in scan_file:
+			if line.find('<scan num=') != -1: #found scan                                  #
+				current_scan['num'] = int(line[line.find("=")+2:-2]) #scan num
+			if line.find('<peaks') != -1:
+				seen_peak_open = True
+			if line.find('>') != -1 and seen_peak_open:
+				peaks += line[line.find('>')+1:].strip()
+			if line.find('</peaks>') != -1 and seen_peak_open:
+				peaks += line[:line.find('</peaks>')]
+				current_scan['peaks'] = peaks[:peaks.find('</peaks> ')]
+				scans_obj.append(current_scan)
+				seen_peak_open = False
+				seen_peak_close = True
+			if debug and seen_peak_close:
+				print(current_scan)
+				#handle_peak(current_scan['peaks'])
+			if not RAM and not debug and seen_peak_close:
+				database.add_scan(database_name,current_scan)
+			if RAM and not debug and seen_peak_close:
+				scans_obj.append(current_scan)
+			if seen_peak_close and line.find('</scan>') != -1:
+				current_scan = {}
+				peaks = ""
+				seen_peak_close = False
+	if RAM:
+		database.add_scan(database_name,scans_obj,True)
+
+
+
+def handle_peak(encoded_peaks):
+	peaks = base64.b64decode(encoded_peaks)
+	mz_list,intensity_list = parse_peaks(peaks)
+
+	for mz in mz_list:
+		print(mz)
 
 def find_scan(file_name,scan_num):
 	with open (file_name,'r') as scan_file:
@@ -110,12 +156,13 @@ def write_to_csv(filename,data):
 if __name__ == '__main__':
 	#data = find_scan("real.mzXML",5000)	
 		#mz_list,intensity_list,precursor_charge = get_peaks('160108_C812-1_a.mzXML',21822)
-	peaks,precursor_charge = find_scan('160108_C812-1_a.mzXML',21822)
-	print (precursor_charge)
-	print (peaks)
+	# peaks,precursor_charge = find_scan('160108_C812-1_a.mzXML',21822)
+	# print (precursor_charge)
+	#print (peaks)
 	# print('{0:15} | {1:2}'.format("        mz","mz intensity"))
 	# for mz,intensity in zip(mz_list,intensity_list):
 	# 	print('{0:15f} | {1:2f}'.format(mz,intensity))
 
 	# print("GENERATING csv file. Open output.csv after termination")
 	# write_to_csv("output",mz_list)
+	file_to_object('160108_C812-1_a.mzXML','test',False,False)
