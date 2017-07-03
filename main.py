@@ -84,6 +84,8 @@ def write_csv_files(experiment,scan_results,peaks=True):
 				for peak in zip(scan['peaks']):# Write each peak in new row
 					csv_writer.writerow({'peaks':peak[0]})
 
+def mzxml_to_db(mzxml_file,experiment):
+	mzxml_parser.file_to_object(mzxml_file,experiment)
 
 if __name__ == '__main__':
 
@@ -100,5 +102,7 @@ if __name__ == '__main__':
 	#collated_data = colate_scan_info(args.infile,args.scans)
 	if args.name is None: #Check to see if --name was passed
 		args.name = args.infile
-	get_batch_peaks(args.infile,args.minfdr,args.name,True)
+	#get_batch_peaks(args.infile,args.minfdr,args.name,True)
 	#write_csv_files(args.name,collated_data)
+	mzxml_to_db(args.infile,args.name)
+	print ("time for "+ args.infile +":" + time.process_time()/60 + "minutes")
