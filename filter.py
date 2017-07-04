@@ -75,6 +75,36 @@ def filter_by_peaks(results_dir,min_val,max_val):
 		for spectra_set in good_psm_list:
 			writer.writerow(spectra_set)
 
+# Remove entries created by "filter_by_peaks" from main file
+def remove_peptides(to_remove_file,main_file,output_file):
+	remove_peptide_list = []
+	check_psm_list = []
+	fieldnames = []
+	with open(to_remove_file,'r') as remove_list:
+		remove_reader = csv.DictReader(remove_list)
+		remove_list = list(remove_reader)
+	for psm in remove_list:
+		del psm['peak']
+		spectra_set = psm['spectra_set']
+		psm['spectra_set'] = spectra_set[:spectra_set.find('.mzXML')]
+
+	with open(main_file,'r') as main_file:
+		main_reader = csv.DictReader(main_file)
+		fieldnames = main_reader.fieldnames
+		for psm in main_reader:
+			cur_psm = {'scan':psm['start_scan'],'spectra_set':psm['spectra_set']}
+			if cur_psm in remove_list:
+				if psm['peptide'] not in remove_peptide_list:
+					remove_peptide_list.append(psm['peptide'])
+				
+	base_path = os.path.dirname(os.path.realpath(__file__))
+	with open('results/'+output_file,'a') as output:
+		writer = csv.DictWriter(output,fieldnames=['peptide'])
+		writer.writeheader()
+		print("WRITING CSV FILE")
+		for peptide in remove_peptide_list:
+			writer.writerow({'peptide':peptide})
+
 if __name__ == '__main__':
 	#sort_by_peptide('remaining_psm.csv')
 	#min_fdr('results/peptides')
@@ -82,6 +112,8 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Various functions to filter results')
 	parser.add_argument('--pfilter',type=str,help='check scans from this results \
 						folder for peaks between 259.50 and 260.77',)
+	parser.add_argument('--peptide_check',type=str,help='Find peptides occuring in file created by pfilter')
 	args = parser.parse_args()
-	filter_by_peaks(args.pfilter,259.50,260.77)
+	#filter_by_peaks(args.pfilter,259.50,260.77)
+	remove_peptides('results/all_do_not_check.csv','results/Mothership.csv','remove_peptides.csv')
 
