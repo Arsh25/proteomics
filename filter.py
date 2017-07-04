@@ -75,8 +75,27 @@ def filter_by_peaks(results_dir,min_val,max_val):
 		for spectra_set in good_psm_list:
 			writer.writerow(spectra_set)
 
+def filter_by_rsc(rsc_file,output_file):
+	base_path = os.path.dirname(os.path.realpath(__file__))
+	keep_list = []
+	with open(rsc_file,'r') as full_file:
+		protein_list = []
+		reader = csv.DictReader(full_file)
+		for entry in reader:
+				protein_list.append(entry['Protein'])
+		full_file.seek(0)
+		for entry in reader:
+			if entry['Entry'] in protein_list and entry['Entry'] != "":
+				keep_list.append({'INF Rsc':entry['INF Rsc'],'Protein':entry['Entry']})
+	#print(keep_list)
+	os.chdir(base_path)
+	with open('results/'+output_file,'a') as output_file:
+		writer = csv.DictWriter(output_file,fieldnames=['INF Rsc','Protein'])
+		writer.writeheader()
+		writer.writerows(keep_list)
+
 # Remove entries created by "filter_by_peaks" from main file
-def remove_peptides(to_remove_file,main_file,output_file):
+def remove_peptides(to_remove_file,output_file):
 	remove_peptide_list = []
 	check_psm_list = []
 	fieldnames = []
@@ -115,5 +134,5 @@ if __name__ == '__main__':
 	parser.add_argument('--peptide_check',type=str,help='Find peptides occuring in file created by pfilter')
 	args = parser.parse_args()
 	#filter_by_peaks(args.pfilter,259.50,260.77)
-	remove_peptides('results/all_do_not_check.csv','results/Mothership.csv','remove_peptides.csv')
-
+	#remove_peptides('results/all_do_not_check.csv','results/Mothership.csv','remove_peptides.csv')
+	filter_by_rsc('sheetforRSC.csv','rsc_filtered.csv')
