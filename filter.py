@@ -86,13 +86,43 @@ def filter_by_rsc(rsc_file,output_file):
 		full_file.seek(0)
 		for entry in reader:
 			if entry['Entry'] in protein_list and entry['Entry'] != "":
-				keep_list.append({'INF Rsc':entry['INF Rsc'],'Protein':entry['Entry']})
+				keep_list.append({'INF Rsc':entry['INF Rsc'],'Protein':entry['Entry'],'FDR':entry['FDR']})
 	#print(keep_list)
 	os.chdir(base_path)
 	with open('results/'+output_file,'a') as output_file:
-		writer = csv.DictWriter(output_file,fieldnames=['INF Rsc','Protein'])
+		writer = csv.DictWriter(output_file,fieldnames=['INF Rsc','Protein','FDR'])
 		writer.writeheader()
 		writer.writerows(keep_list)
+
+def peptide_sublist(full_file,sublist_file,results_file):
+	return_list = []
+	peptide_sublist = []
+	sublist_peptides = []
+	fieldnames = []
+	with open(sublist_file,'r') as sublist:
+		reader = csv.DictReader(sublist)
+		for entry in reader:
+			sublist_peptides.append(entry['GG-modified peptide'])
+			peptide_sublist.append(entry)
+			
+	with open(full_file,'r') as full_list:
+		reader = csv.DictReader(full_list)
+		fieldnames = reader.fieldnames
+		for entry in reader:
+			if entry['GG-modified peptide'] in sublist_peptides:
+				for peptide in peptide_sublist:
+					if peptide['GG-modified peptide'] == entry['GG-modified peptide']:
+						entry['Protein Accession number'] = peptide['Protein Accession number']
+				return_list.append(entry)
+
+	base_path = os.path.dirname(os.path.realpath(__file__))
+	os.chdir(base_path+'/results')
+	with open(results_file,'a') as results:
+		fieldnames.append('Protein Accession number')
+		writer = csv.DictWriter(results,fieldnames)
+		writer.writeheader()
+		writer.writerows(return_list)
+
 
 # Remove entries created by "filter_by_peaks" from main file
 def remove_peptides(to_remove_file,output_file):
@@ -135,4 +165,5 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	#filter_by_peaks(args.pfilter,259.50,260.77)
 	#remove_peptides('results/all_do_not_check.csv','results/Mothership.csv','remove_peptides.csv')
-	filter_by_rsc('sheetforRSC.csv','rsc_filtered.csv')
+	#filter_by_rsc('sheetforRSC.csv','rsc_filtered.csv')
+	peptide_sublist('peptide_full.csv','peptide_sublist.csv','GG_filtered.csv')
