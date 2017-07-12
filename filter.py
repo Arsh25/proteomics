@@ -123,6 +123,28 @@ def peptide_sublist(full_file,sublist_file,results_file):
 		writer.writeheader()
 		writer.writerows(return_list)
 
+def omit_Ubproteins(full_file,to_remove_file,results_file):
+	keep_list = []
+	remove_list = []
+	fieldnamesv = []
+	with open(to_remove_file,'r') as to_remove:
+		reader = csv.DictReader(to_remove)
+		for protein in reader:
+			remove_list.append(protein['Ub proteins'])
+	
+	with open(full_file,'r') as full_list:
+		reader = csv.DictReader(full_list)
+		fieldnames = reader.fieldnames
+		for entry in reader:
+			if entry['Protein'] not in remove_list:
+				keep_list.append(entry)
+	
+	base_path = os.path.dirname(os.path.realpath(__file__))
+	os.chdir(base_path+'/results')
+	with open(results_file,'a') as results:
+		writer = csv.DictWriter(results,fieldnames)
+		writer.writeheader()
+		writer.writerows(keep_list)
 
 # Remove entries created by "filter_by_peaks" from main file
 def remove_peptides(to_remove_file,output_file):
@@ -166,4 +188,5 @@ if __name__ == '__main__':
 	#filter_by_peaks(args.pfilter,259.50,260.77)
 	#remove_peptides('results/all_do_not_check.csv','results/Mothership.csv','remove_peptides.csv')
 	#filter_by_rsc('sheetforRSC.csv','rsc_filtered.csv')
-	peptide_sublist('peptide_full.csv','peptide_sublist.csv','GG_filtered.csv')
+	#peptide_sublist('peptide_full.csv','peptide_sublist.csv','GG_filtered.csv')
+	omit_Ubproteins('Workbook1.csv','things to omit.csv','Ub_proteins_keep.csv')
